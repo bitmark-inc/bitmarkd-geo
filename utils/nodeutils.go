@@ -132,6 +132,7 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key str
 	// ProgressBar
 	bar := progressbar.New(10)
 
+	countNodes := 0
 	for _, data := range nodeInfo {
 		bar.Add(1)
 		nodeIP := strings.FieldsFunc(data.Listeners[0], brackets)
@@ -148,7 +149,10 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key str
 			Error.Println("Error to get information from IP:", nodeIP)
 		}
 		lastKey = data.PublicKey
+		countNodes++
 	}
+
+	fmt.Println("Number of nodes:", countNodes)
 
 	return lastKey
 }
