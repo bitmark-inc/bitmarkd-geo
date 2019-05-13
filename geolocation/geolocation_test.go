@@ -22,10 +22,10 @@ func TestGetLatLon(t *testing.T) {
 	}
 
 	if reflect.ValueOf(lat).Kind() != reflect.Float64 {
-		t.Fatal("The value of lat must be float64")
+		t.Error("The value of lat must be float64")
 	}
 
 	if reflect.ValueOf(lon).Kind() != reflect.Float64 {
-		t.Fatal("The value of lon must be float64")
+		t.Error("The value of lon must be float64")
 	}
 }
