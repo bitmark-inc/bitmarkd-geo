@@ -63,6 +63,7 @@ var (
 	gl    GeoLocation
 )
 
+// GetLocalIPv4 - Return the local machine WAN ip
 func GetLocalIPv4(iface string) (ifaceip net.IP) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
@@ -89,6 +90,7 @@ func GetLocalIPv4(iface string) (ifaceip net.IP) {
 	return (nil)
 }
 
+// GetLatLon - Get lat and lon of the local machine WAN IP
 func GetLatLon(ipAddress string) (lat float64, lon float64, err error) {
 	url := ipapi + string(ipAddress)
 

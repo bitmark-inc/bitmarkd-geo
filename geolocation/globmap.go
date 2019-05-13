@@ -47,6 +47,7 @@ var (
 	imgPath        = "geoimg/"
 )
 
+// FlatMap - Create the context for the flatmap
 func FlatMap() (flatmap *sm.Context) {
 	flatmap = sm.NewContext()
 	flatmap.SetSize(1920, 1080)
@@ -55,20 +56,7 @@ func FlatMap() (flatmap *sm.Context) {
 	return flatmap
 }
 
-func FlatMapRender(flatmap *sm.Context) (err error) {
-	img, err := flatmap.Render()
-	if err != nil {
-		return err
-	}
-
-	err = gg.SavePNG(imgPath+"flatmap.png", img)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
+// FlatMapAddMarker - Add markers in the flatmap
 func FlatMapAddMarker(flatmap *sm.Context, lat float64, lon float64) {
 	skey := fmt.Sprintf("%f,%f", lat, lon)
 	if _, ok := ndDistribution[skey]; ok {
@@ -84,6 +72,22 @@ func FlatMapAddMarker(flatmap *sm.Context, lat float64, lon float64) {
 		green, 01.0+float64(ndDistribution[skey])))
 }
 
+// FlatMapRender - Render the image for the flat map
+func FlatMapRender(flatmap *sm.Context) (err error) {
+	img, err := flatmap.Render()
+	if err != nil {
+		return err
+	}
+
+	err = gg.SavePNG(imgPath+"flatmap.png", img)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GlobeMap - Create the context for the globemap
 func GlobeMap() (globemap *globe.Globe) {
 	globemap = globe.New()
 	globemap.DrawGraticule(10.0)
@@ -92,6 +96,7 @@ func GlobeMap() (globemap *globe.Globe) {
 	return globemap
 }
 
+// GlobeMapAddMarker - Add markers in the globemap
 func GlobeMapAddMarker(globemap *globe.Globe, lat float64, lon float64) {
 	skey := fmt.Sprintf("%f,%f", lat, lon)
 	if _, ok := ndDistribution[skey]; ok {
@@ -113,6 +118,7 @@ func GlobeMapAddMarker(globemap *globe.Globe, lat float64, lon float64) {
 	plon = lon
 }
 
+// GlobeMapRender - Render the image for the globe map
 func GlobeMapRender(globemap *globe.Globe, myWanLat float64, myWanLon float64) {
 	globemap.CenterOn(myWanLat-1, myWanLon-5)
 	globemap.SavePNG(imgPath+"globe.png", 1024)

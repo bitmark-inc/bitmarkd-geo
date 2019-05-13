@@ -39,6 +39,7 @@ var (
 	Error   *log.Logger
 )
 
+// InitLog - Initialize package log.
 func InitLog(traceHandle io.Writer, infoHandle io.Writer,
 	warningHandle io.Writer, errorHandle io.Writer) {
 

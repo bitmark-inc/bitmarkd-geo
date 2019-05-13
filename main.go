@@ -50,7 +50,7 @@ func main() {
 	var nodeKey, lastNodeKey string
 
 	// My Localtion
-	myIP_lat, myIP_lon := utils.MyWanIp()
+	myIPlat, myIPlon := utils.MyWanIp()
 
 	flatmap := geolocation.FlatMap()
 	globemap := geolocation.GlobeMap()
@@ -69,7 +69,7 @@ func main() {
 	}
 
 	geolocation.FlatMapRender(flatmap)
-	geolocation.GlobeMapRender(globemap, myIP_lat, myIP_lon)
+	geolocation.GlobeMapRender(globemap, myIPlat, myIPlon)
 
 	fmt.Println("\n\t\t\tDone with <3")
 }

@@ -73,6 +73,7 @@ func webClientIPv4() (webclient *http.Client) {
 	return webcl
 }
 
+// MyWanIp - Gets the local machine WANIP and returns lat and lon.
 func MyWanIp() (lat float64, lon float64) {
 	webclient := webClientIPv4()
 	resp, err := webclient.Get("http://myexternalip.com/raw")
@@ -98,12 +99,14 @@ func brackets(r rune) bool {
 	return r == '[' || r == ']'
 }
 
+// ParseNode - Parses a json provide by the bitmarkd node
 func ParseNode(s []byte) (nodeInfo []geolocation.NodeInfo) {
 	json.Unmarshal(s, &nodeInfo)
 
 	return nodeInfo
 }
 
+// WorldNodes - Creates the maps for all nodes
 func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key string) {
 	var lat, lon float64
 	var lastKey string
