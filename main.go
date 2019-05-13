@@ -22,5 +22,54 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *                                                                              
- */                                  
+ *
+ */
+
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+
+	"github.com/araujobsd/bitmarkdgeo/geolocation"
+	"github.com/araujobsd/bitmarkdgeo/utils"
+)
+
+const (
+	nodeUrl = "https://node-d1.live.bitmark.com:2131/bitmarkd/peers?"
+)
+
+var (
+	urlCount = "count=100"
+	urlKey   = "&public_key="
+)
+
+func main() {
+	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	var nodeKey, lastNodeKey string
+
+	// My Localtion
+	myIP_lat, myIP_lon := utils.MyWanIp()
+
+	flatmap := geolocation.FlatMap()
+	globemap := geolocation.GlobeMap()
+
+	fullUrl := nodeUrl + urlCount
+	nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
+
+	for {
+		if nodeKey != lastNodeKey && len(nodeKey) != 0 {
+			lastNodeKey = nodeKey
+			fullUrl = nodeUrl + urlCount + urlKey + lastNodeKey
+			nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
+		} else {
+			break
+		}
+	}
+
+	geolocation.FlatMapRender(flatmap)
+	geolocation.GlobeMapRender(globemap, myIP_lat, myIP_lon)
+
+	fmt.Println("\n\t\t\tDone with <3")
+}
