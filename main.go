@@ -49,7 +49,7 @@ func main() {
 	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	var nodeKey, lastNodeKey string
 
-	// My Localtion
+	// My Location
 	myIPlat, myIPlon := utils.MyWanIp()
 
 	flatmap := geolocation.FlatMap()
