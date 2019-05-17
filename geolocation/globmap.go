@@ -44,13 +44,14 @@ var (
 	red            = color.NRGBA{255, 0, 0, 255}
 	plat           float64
 	plon           float64
-	imgPath        = "geoimg/"
+	imgPath        = "webserver/mysite/img/"
+	WasItRotate    = 0
 )
 
 // FlatMap - Create the context for the flatmap
 func FlatMap() (flatmap *sm.Context) {
 	flatmap = sm.NewContext()
-	flatmap.SetSize(1920, 1080)
+	flatmap.SetSize(800, 600)
 	flatmap.SetCenter(s2.LatLngFromDegrees(8.7832, 34.5085))
 
 	return flatmap
@@ -120,6 +121,9 @@ func GlobeMapAddMarker(globemap *globe.Globe, lat float64, lon float64) {
 
 // GlobeMapRender - Render the image for the globe map
 func GlobeMapRender(globemap *globe.Globe, myWanLat float64, myWanLon float64) {
-	globemap.CenterOn(myWanLat-1, myWanLon-5)
-	globemap.SavePNG(imgPath+"globe.png", 1024)
+	if WasItRotate == 0 {
+		globemap.CenterOn(myWanLat, myWanLon)
+		WasItRotate = 1
+	}
+	globemap.SavePNG(imgPath+"globe.png", 600)
 }

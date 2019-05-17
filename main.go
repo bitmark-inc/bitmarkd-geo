@@ -29,8 +29,15 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
+	"sort"
+	"strconv"
+	"sync"
+	"time"
 
 	"github.com/araujobsd/bitmarkdgeo/geolocation"
 	"github.com/araujobsd/bitmarkdgeo/utils"
@@ -43,33 +50,183 @@ const (
 var (
 	urlCount = "count=100"
 	urlKey   = "&public_key="
+	mutex    = &sync.Mutex{}
 )
 
+type Broker struct {
+	clients        map[chan string]bool
+	newClients     chan chan string
+	defunctClients chan chan string
+	messages       chan string
+}
+
+func (b *Broker) Start() {
+	go func() {
+		for {
+			select {
+
+			case s := <-b.newClients:
+				b.clients[s] = true
+				//log.Println("New client")
+
+			case s := <-b.defunctClients:
+				delete(b.clients, s)
+				close(s)
+				//log.Println("Removed client")
+
+			case msg := <-b.messages:
+				for s := range b.clients {
+					s <- msg
+				}
+				log.Printf("Broadcast message to %d clients", len(b.clients))
+			}
+		}
+	}()
+}
+
+func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	f, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Cannot flush it!", http.StatusInternalServerError)
+		return
+	}
+
+	messageChan := make(chan string)
+
+	b.newClients <- messageChan
+
+	notify := w.(http.CloseNotifier).CloseNotify()
+	go func() {
+		<-notify
+		b.defunctClients <- messageChan
+		log.Println("HTTP connection closed.")
+	}()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Transfer-Encoding", "chunked")
+
+	for {
+		msg, open := <-messageChan
+
+		if !open {
+			break
+		}
+
+		fmt.Fprintf(w, "data: %s\n\n", msg)
+		f.Flush()
+	}
+
+	log.Println("Finished HTTP request ", r.URL.Path)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	t, err := template.ParseFiles("webserver/mysite/index.html")
+	if err != nil {
+		log.Fatal("Error parsing template.")
+
+	}
+
+	t.Execute(w, "Bitmark Inc.")
+	log.Println("Finished HTTP request ", r.URL.Path)
+}
+
 func main() {
-	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	var nodeKey, lastNodeKey string
+	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 
 	// My Location
-	myIPlat, myIPlon := utils.MyWanIp()
+	// myIPlat, myIPlon := utils.MyWanIp()
+	myIPlat := 25.0478
+	myIPlon := 121.5318
 
 	flatmap := geolocation.FlatMap()
 	globemap := geolocation.GlobeMap()
 
+	b := &Broker{
+		make(map[chan string]bool),
+		make(chan (chan string)),
+		make(chan (chan string)),
+		make(chan string),
+	}
+
+	c := &Broker{
+		make(map[chan string]bool),
+		make(chan (chan string)),
+		make(chan (chan string)),
+		make(chan string),
+	}
+
+	b.Start()
+	c.Start()
+	http.Handle("/events/", b)
+	http.Handle("/counter/", c)
+
 	fullUrl := nodeUrl + urlCount
 	nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
 
-	for {
-		if nodeKey != lastNodeKey && len(nodeKey) != 0 {
-			lastNodeKey = nodeKey
-			fullUrl = nodeUrl + urlCount + urlKey + lastNodeKey
-			nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
-		} else {
-			break
-		}
-	}
-
+	mutex.Lock()
 	geolocation.FlatMapRender(flatmap)
 	geolocation.GlobeMapRender(globemap, myIPlat, myIPlon)
+	mutex.Unlock()
 
-	fmt.Println("\n\t\t\tDone with <3")
+	go func() {
+		for {
+			for {
+				if nodeKey != lastNodeKey && len(nodeKey) != 0 {
+					lastNodeKey = nodeKey
+					fullUrl = nodeUrl + urlCount + urlKey + lastNodeKey
+					nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
+				} else {
+					break
+				}
+			}
+
+			sortCountries := make([]string, 0, len(geolocation.CountryMap))
+			for country := range geolocation.CountryMap {
+				sortCountries = append(sortCountries, country)
+			}
+			sort.Strings(sortCountries)
+
+			html := ""
+			for _, val := range sortCountries {
+				l := []string{"*" + val + "*"}
+				html = html + "<tr><td class='col-xs-2'><center>" + strconv.Itoa(geolocation.CountryMap[val]) + "</td>" +
+					"</center><td class='col-xs-2'><img height='30' width='40' src=" + utils.FindFileFlag("webserver/mysite/flags/", l) + "> - " + val + " </td></tr>"
+				utils.FindFileFlag("webserver/mysite/flags/", l)
+			}
+
+			b.messages <- fmt.Sprintf("%s", html)
+
+			mutex.Lock()
+			geolocation.FlatMapRender(flatmap)
+			geolocation.GlobeMapRender(globemap, myIPlat, myIPlon)
+			mutex.Unlock()
+
+			time.Sleep(time.Duration(5) * time.Second)
+		}
+	}()
+
+	go func() {
+		var html string
+		for i := 0; ; i++ {
+			nodesCounter := utils.NumberOfNodes()
+			html = "<th class='col-xs-2'><center>Number of nodes: " + strconv.Itoa(nodesCounter) + "</center></div></th>"
+			c.messages <- fmt.Sprintf("%s", html)
+
+			time.Sleep(time.Duration(3) * time.Second)
+		}
+	}()
+
+	http.Handle("/", http.FileServer(http.Dir("webserver/mysite")))
+	err := http.ListenAndServeTLS(":8000", "/usr/local/etc/letsencrypt/live/status.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/status.bitmark.com/privkey.pem", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }

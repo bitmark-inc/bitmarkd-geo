@@ -34,6 +34,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -43,8 +44,10 @@ import (
 	"github.com/schollz/progressbar"
 )
 
+var NodesCount int
+
 func webClientIPv4() (webclient *http.Client) {
-	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4("enp0s25")))
+	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4("vtnet0")))
 	if err != nil {
 		panic(err)
 	}
@@ -106,6 +109,10 @@ func ParseNode(s []byte) (nodeInfo []geolocation.NodeInfo) {
 	return nodeInfo
 }
 
+func NumberOfNodes() (total int) {
+	return NodesCount
+}
+
 // WorldNodes - Creates the maps for all nodes
 func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key string) {
 	var lat, lon float64
@@ -132,7 +139,7 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key str
 	// ProgressBar
 	bar := progressbar.New(10)
 
-	countNodes := 0
+	nodesCount := 0
 	for _, data := range nodeInfo {
 		bar.Add(1)
 		nodeIP := strings.FieldsFunc(data.Listeners[0], brackets)
@@ -149,10 +156,29 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key str
 			Error.Println("Error to get information from IP:", nodeIP)
 		}
 		lastKey = data.PublicKey
-		countNodes++
+		nodesCount++
 	}
 
-	fmt.Println("Number of nodes:", countNodes)
+	fmt.Println("Number of nodes:", nodesCount)
+	NodesCount = nodesCount
 
 	return lastKey
+}
+
+func FindFileFlag(dir string, file []string) (flag string) {
+	for _, v := range file {
+		v = strings.Replace(v, " ", "-", -1)
+		found, err := filepath.Glob(dir + v)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if len(found) != 0 {
+			found[0] = strings.Replace(found[0], "webserver/mysite/", "", -1)
+			return found[0]
+		}
+	}
+
+	return
 }

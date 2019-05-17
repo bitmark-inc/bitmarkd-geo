@@ -59,8 +59,9 @@ type NodeInfo struct {
 }
 
 var (
-	ipapi = "http://ip-api.com/json/"
-	gl    GeoLocation
+	ipapi      = "http://ip-api.com/json/"
+	gl         GeoLocation
+	CountryMap map[string]int
 )
 
 // GetLocalIPv4 - Return the local machine WAN ip
@@ -90,7 +91,19 @@ func GetLocalIPv4(iface string) (ifaceip net.IP) {
 	return (nil)
 }
 
-// GetLatLon - Get lat and lon of the local machine WAN IP
+func SetContriesNumber(countryName string) {
+	if CountryMap == nil {
+		CountryMap = make(map[string]int)
+	}
+
+	if _, ok := CountryMap[countryName]; ok {
+		CountryMap[countryName]++
+	} else {
+		CountryMap[countryName] = 1
+	}
+}
+
+// GetLatLon - Get lat and lon of the WAN IP
 func GetLatLon(ipAddress string) (lat float64, lon float64, err error) {
 	url := ipapi + string(ipAddress)
 
@@ -106,6 +119,8 @@ func GetLatLon(ipAddress string) (lat float64, lon float64, err error) {
 	if gl.Status == "fail" {
 		err = errors.New(gl.Status)
 	}
+
+	SetContriesNumber(gl.Country)
 
 	return gl.Lat, gl.Lon, err
 }
