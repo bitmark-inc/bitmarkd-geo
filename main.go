@@ -39,18 +39,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/araujobsd/bitmarkdgeo/geolocation"
 	"github.com/araujobsd/bitmarkdgeo/utils"
 )
 
 const (
-	nodeUrl = "https://node-d1.live.bitmark.com:2131/bitmarkd/peers?"
+	globalTimeOut = 5
 )
 
 var (
+	nodeUrl  = "https://node-d1.live.bitmark.com:2131/bitmarkd/peers?"
 	urlCount = "count=100"
 	urlKey   = "&public_key="
 	mutex    = &sync.Mutex{}
+	IPlist   = make(map[string]string)
 )
 
 type Broker struct {
@@ -138,16 +139,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var nodeKey, lastNodeKey string
 	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-
-	// My Location
-	// myIPlat, myIPlon := utils.MyWanIp()
-	myIPlat := 25.0478
-	myIPlon := 121.5318
-
-	flatmap := geolocation.FlatMap()
-	globemap := geolocation.GlobeMap()
 
 	b := &Broker{
 		make(map[chan string]bool),
@@ -168,64 +160,55 @@ func main() {
 	http.Handle("/events/", b)
 	http.Handle("/counter/", c)
 
-	fullUrl := nodeUrl + urlCount
-	nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
-
-	mutex.Lock()
-	geolocation.FlatMapRender(flatmap)
-	geolocation.GlobeMapRender(globemap, myIPlat, myIPlon)
-	mutex.Unlock()
-
+	// Create maps and flags
 	go func() {
 		for {
-			for {
-				if nodeKey != lastNodeKey && len(nodeKey) != 0 {
-					lastNodeKey = nodeKey
-					fullUrl = nodeUrl + urlCount + urlKey + lastNodeKey
-					nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl)
-				} else {
-					break
-				}
-			}
+			mutex.Lock()
+			_ = utils.RunStandalone()
+			countryTotal := utils.CountryTotal()
+			mutex.Unlock()
 
-			sortCountries := make([]string, 0, len(geolocation.CountryMap))
-			for country := range geolocation.CountryMap {
+			sortCountries := make([]string, 0, len(countryTotal))
+			for country := range countryTotal {
 				sortCountries = append(sortCountries, country)
 			}
 			sort.Strings(sortCountries)
 
 			html := ""
-			for _, val := range sortCountries {
-				l := []string{"*" + val + "*"}
-				html = html + "<tr><td class='col-xs-2'><center>" + strconv.Itoa(geolocation.CountryMap[val]) + "</td>" +
-					"</center><td class='col-xs-2'><img height='30' width='40' src=" + utils.FindFileFlag("webserver/mysite/flags/", l) + "> - " + val + " </td></tr>"
-				utils.FindFileFlag("webserver/mysite/flags/", l)
+			for _, v := range sortCountries {
+				l := []string{"*" + v + "*"}
+				html = html + "<div class='field_event'><span class='col col1'><center>" + strconv.Itoa(countryTotal[v]) + "</center></span>" + "<span class='col col2'><img height='30' width='40' src=" + utils.FindFileFlag("webserver/mysite/flags/", l) + "> - " + v + "</span></div>"
 			}
 
 			b.messages <- fmt.Sprintf("%s", html)
 
-			mutex.Lock()
-			geolocation.FlatMapRender(flatmap)
-			geolocation.GlobeMapRender(globemap, myIPlat, myIPlon)
-			mutex.Unlock()
-
-			time.Sleep(time.Duration(5) * time.Second)
+			time.Sleep(time.Duration(globalTimeOut) * time.Second)
 		}
 	}()
 
 	go func() {
 		var html string
-		for i := 0; ; i++ {
-			nodesCounter := utils.NumberOfNodes()
-			html = "<th class='col-xs-2'><center>Number of nodes: " + strconv.Itoa(nodesCounter) + "</center></div></th>"
+		var total int
+
+		mutex.Lock()
+		con := utils.CountryTotal()
+		mutex.Unlock()
+
+		for _, v := range con {
+			total += v
+		}
+
+		for {
+			html = "Number of nodes: " + strconv.Itoa(total)
 			c.messages <- fmt.Sprintf("%s", html)
 
-			time.Sleep(time.Duration(3) * time.Second)
+			time.Sleep(time.Duration(globalTimeOut) * time.Second)
 		}
 	}()
 
 	http.Handle("/", http.FileServer(http.Dir("webserver/mysite")))
-	err := http.ListenAndServeTLS(":8000", "/usr/local/etc/letsencrypt/live/status.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/status.bitmark.com/privkey.pem", nil)
+	err := http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)
+	//err := http.ListenAndServe(":8001", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

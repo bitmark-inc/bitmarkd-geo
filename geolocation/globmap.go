@@ -125,5 +125,6 @@ func GlobeMapRender(globemap *globe.Globe, myWanLat float64, myWanLon float64) {
 		globemap.CenterOn(myWanLat, myWanLon)
 		WasItRotate = 1
 	}
+	globemap.CenterOn(myWanLat, myWanLon)
 	globemap.SavePNG(imgPath+"globe.png", 600)
 }

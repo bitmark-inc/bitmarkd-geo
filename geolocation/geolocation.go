@@ -91,7 +91,7 @@ func GetLocalIPv4(iface string) (ifaceip net.IP) {
 	return (nil)
 }
 
-func SetContriesNumber(countryName string) {
+func SetCountriesNumber(countryName string) {
 	if CountryMap == nil {
 		CountryMap = make(map[string]int)
 	}
@@ -104,7 +104,7 @@ func SetContriesNumber(countryName string) {
 }
 
 // GetLatLon - Get lat and lon of the WAN IP
-func GetLatLon(ipAddress string) (lat float64, lon float64, err error) {
+func GetLatLon(ipAddress string) (lat float64, lon float64, country string, err error) {
 	url := ipapi + string(ipAddress)
 
 	response, err := http.Get(url)
@@ -120,7 +120,7 @@ func GetLatLon(ipAddress string) (lat float64, lon float64, err error) {
 		err = errors.New(gl.Status)
 	}
 
-	SetContriesNumber(gl.Country)
+	SetCountriesNumber(gl.Country)
 
-	return gl.Lat, gl.Lon, err
+	return gl.Lat, gl.Lon, gl.Country, err
 }
