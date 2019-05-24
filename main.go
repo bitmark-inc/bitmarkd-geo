@@ -169,7 +169,7 @@ func main() {
 	http.Handle("/counter/", c)
 	http.Handle("/map/", d)
 
-	// Create maps and flags
+	// Create flags
 	go func() {
 		for {
 			mutex.Lock()
@@ -194,6 +194,7 @@ func main() {
 		}
 	}()
 
+	// Create nodes counter
 	go func() {
 		var html string
 		var total int
@@ -214,6 +215,7 @@ func main() {
 		}
 	}()
 
+	// Create maps
 	go func() {
 		for {
 			mutex.Lock()
