@@ -29,22 +29,27 @@ package utils
 
 import (
 	"crypto/tls"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/araujobsd/bitmarkdgeo/geolocation"
 	"github.com/flopp/go-staticmaps"
 	"github.com/mmcloughlin/globe"
-	"github.com/schollz/progressbar"
 )
 
-var NodesCount int
+const (
+	standalone = "/usr/local/bin/bitmarkd-geo-cmd"
+)
 
 func webClientIPv4() (webclient *http.Client) {
 	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4("vtnet0")))
@@ -90,7 +95,7 @@ func MyWanIp() (lat float64, lon float64) {
 		panic(err)
 	}
 
-	lat, lon, err = geolocation.GetLatLon(string(data))
+	lat, lon, _, err = geolocation.GetLatLon(string(data))
 	if err != nil {
 		panic(err)
 	}
@@ -109,14 +114,69 @@ func ParseNode(s []byte) (nodeInfo []geolocation.NodeInfo) {
 	return nodeInfo
 }
 
-func NumberOfNodes() (total int) {
-	return NodesCount
+func parseCsv() (rows [][]string, err error) {
+	file, err := os.Open("/tmp/nodes.csv")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	csvReader := csv.NewReader(file)
+	rows, err = csvReader.ReadAll()
+	if err != nil {
+		panic(err)
+	}
+
+	return rows, err
+}
+
+func RunStandalone() (err error) {
+	_, err = exec.Command(standalone).Output()
+	if err != nil {
+		panic(err)
+	}
+
+	return
+}
+
+func CountryTotal() (m map[string]int) {
+	m = make(map[string]int)
+
+	rows, _ := parseCsv()
+	for _, val := range rows {
+		valSplit := strings.Split(val[0], ",") // [0] IPAddress, [1] Country Name
+		if _, ok := m[valSplit[1]]; ok {
+			m[valSplit[1]]++
+		} else {
+			m[valSplit[1]] = 1
+		}
+	}
+
+	return m
+}
+
+func NodeInCSV(ipv4 string) (lat float64, lon float64, country string, have bool) {
+	rows, _ := parseCsv()
+	for _, val := range rows {
+		valSplit := strings.Split(val[0], ",")
+		if valSplit[0] == ipv4 {
+			have = true
+			country = valSplit[1]
+			lat, _ = strconv.ParseFloat(valSplit[2], 64)
+			lon, _ = strconv.ParseFloat(valSplit[3], 64)
+
+			return lat, lon, country, have
+		}
+	}
+
+	return 0, 0, "", false
 }
 
 // WorldNodes - Creates the maps for all nodes
-func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key string) {
+func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string, m *TTLMap) (key string) {
 	var lat, lon float64
-	var lastKey string
+	var lastKey, country string
+	var have bool
 
 	webclient := webClientIPv4()
 	response, err := webclient.Get(url)
@@ -136,38 +196,38 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string) (key str
 		return ""
 	}
 
-	// ProgressBar
-	bar := progressbar.New(10)
-
-	nodesCount := 0
 	for _, data := range nodeInfo {
-		bar.Add(1)
-		nodeIP := strings.FieldsFunc(data.Listeners[0], brackets)
+		if len(data.Listeners) > 0 {
+			nodeIP := strings.FieldsFunc(data.Listeners[0], brackets)
 
-		if strings.Contains(nodeIP[0], ".") {
-			nodeIP = strings.Split(nodeIP[0], ":2136")
-		}
+			if strings.Contains(nodeIP[0], ".") {
+				nodeIP = strings.Split(nodeIP[0], ":2136")
+			}
 
-		lat, lon, err = geolocation.GetLatLon(nodeIP[0])
-		if err == nil {
-			geolocation.GlobeMapAddMarker(globemap, lat, lon)
-			geolocation.FlatMapAddMarker(flatmap, lat, lon)
-		} else {
-			Error.Println("Error to get information from IP:", nodeIP)
+			lat, lon, country, have = NodeInCSV(nodeIP[0])
+			if have == true {
+				fmt.Println("WE HAVE IT: ", country)
+				m.Put(nodeIP[0], country, lat, lon)
+			} else {
+				fmt.Println("WE DONT HAVE IT: ", country)
+				lat, lon, country, err = geolocation.GetLatLon(nodeIP[0])
+				if err == nil {
+					m.Put(nodeIP[0], country, lat, lon)
+				}
+			}
 		}
-		lastKey = data.PublicKey
-		nodesCount++
 	}
 
-	fmt.Println("Number of nodes:", nodesCount)
-	NodesCount = nodesCount
+	for _, v := range m.m {
+		geolocation.GlobeMapAddMarker(globemap, v.Lat, v.Lon)
+		geolocation.FlatMapAddMarker(flatmap, v.Lat, v.Lon)
+	}
 
 	return lastKey
 }
 
 func FindFileFlag(dir string, file []string) (flag string) {
 	for _, v := range file {
-		v = strings.Replace(v, " ", "-", -1)
 		found, err := filepath.Glob(dir + v)
 
 		if err != nil {
