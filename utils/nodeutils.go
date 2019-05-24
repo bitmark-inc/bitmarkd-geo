@@ -206,10 +206,8 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string, m *TTLMa
 
 			lat, lon, country, have = NodeInCSV(nodeIP[0])
 			if have == true {
-				fmt.Println("WE HAVE IT: ", country)
 				m.Put(nodeIP[0], country, lat, lon)
 			} else {
-				fmt.Println("WE DONT HAVE IT: ", country)
 				lat, lon, country, err = geolocation.GetLatLon(nodeIP[0])
 				if err == nil {
 					m.Put(nodeIP[0], country, lat, lon)
