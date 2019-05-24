@@ -74,7 +74,7 @@ func dumpCSV(m *utils.TTLMap) {
 
 func main() {
 	var nodeKey, lastNodeKey string
-	m := utils.NewMap(globalTimeOut)
+	m := utils.NewMap(globalTimeOut * 20)
 
 	myIPlat := 25.0478
 	myIPlon := 121.5318
