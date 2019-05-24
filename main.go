@@ -208,7 +208,6 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("webserver/mysite")))
 	err := http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)
-	//err := http.ListenAndServe(":8001", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
