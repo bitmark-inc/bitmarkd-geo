@@ -43,7 +43,7 @@ import (
 )
 
 const (
-	globalTimeOut = 5
+	globalTimeOut = 10
 )
 
 var (
@@ -155,16 +155,24 @@ func main() {
 		make(chan string),
 	}
 
+	d := &Broker{
+		make(map[chan string]bool),
+		make(chan (chan string)),
+		make(chan (chan string)),
+		make(chan string),
+	}
+
 	b.Start()
 	c.Start()
+	d.Start()
 	http.Handle("/events/", b)
 	http.Handle("/counter/", c)
+	http.Handle("/map/", d)
 
 	// Create maps and flags
 	go func() {
 		for {
 			mutex.Lock()
-			_ = utils.RunStandalone()
 			countryTotal := utils.CountryTotal()
 			mutex.Unlock()
 
@@ -203,6 +211,16 @@ func main() {
 			c.messages <- fmt.Sprintf("%s", html)
 
 			time.Sleep(time.Duration(globalTimeOut) * time.Second)
+		}
+	}()
+
+	go func() {
+		for {
+			mutex.Lock()
+			_ = utils.RunStandalone()
+			mutex.Unlock()
+
+			time.Sleep(time.Duration(globalTimeOut*120) * time.Second)
 		}
 	}()
 
