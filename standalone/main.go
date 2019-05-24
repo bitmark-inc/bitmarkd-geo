@@ -61,7 +61,6 @@ func dumpCSV(m *utils.TTLMap) {
 	wr := csv.NewWriter(file)
 	defer wr.Flush()
 
-	// fmt.Sprintf("%s", geolocation.GetLocalIPv4("enp0s25")))
 	mutex.Lock()
 	for k, v := range m.GetAll() {
 		a := strings.Fields(fmt.Sprintf("%s,%s,%f,%f", k, strings.Replace(v.Country, " ", "-", -1), v.Lat, v.Lon))
