@@ -326,6 +326,9 @@ a:focus,
 
 .event-table {
     border: solid 0px black;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .event-table th {
@@ -348,7 +351,7 @@ a:focus,
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 30px;
+    height: 40px;
 }
 
 .field_event:nth-child(odd) {
@@ -366,8 +369,8 @@ a:focus,
 }
 
 .field_event .col2 {
-    text-transform: uppercase;
-
+  text-transform: uppercase;
+  text-align: left;
 }
 
 /*Fonts*/
