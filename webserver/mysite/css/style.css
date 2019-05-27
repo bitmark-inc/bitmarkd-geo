@@ -334,13 +334,14 @@ a:focus,
     font-size: 18px;
     color: black;
     padding-bottom: 26px;
+    width: 50%;
 }
 
-.event-table th:nth-child(2) {
+/*.event-table th:nth-child(2) {
     width: 35%;
     text-align: left;
     padding-left: 15px;
-}
+}*/
 
 .field_event {
     display: flex;
@@ -358,12 +359,15 @@ a:focus,
     /*border:solid 1px black;*/
     font-family: AndaleMono;
     font-size: 16px;
-    padding-left: 15px;
+    /*padding-left: 15px;*/
+    width: 50%;
+    text-align: center;
+
 }
 
 .field_event .col2 {
     text-transform: uppercase;
-    width: 35%;
+
 }
 
 /*Fonts*/
