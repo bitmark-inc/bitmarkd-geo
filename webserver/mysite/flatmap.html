@@ -33,28 +33,28 @@
 </head>
 <!-- TABLE -->
 <script type="text/javascript">
-  var map = new EventSource('/map/');
-  var reimg
-  window.onload = function() {
-      reimg = document.getElementById('re')
-      setInterval(function() {
-          reimg.src = reimg.src.replace(/\?.*/, function() {
-              return '?' + new Date()
-          })
-      }, 50000)
-  }
+var map = new EventSource('/map/');
+var reimg
+window.onload = function() {
+    reimg = document.getElementById('re')
+    setInterval(function() {
+        reimg.src = reimg.src.replace(/\?.*/, function() {
+            return '?' + new Date()
+        })
+    }, 50000)
+}
 </script>
 <script type="text/javascript">
-  var counter = new EventSource('/counter/');
-  counter.onmessage = function(cnt) {
-      field_counter.innerHTML = cnt.data;
-  }
-  </script>
-  <script type="text/javascript">
-  var maplist = new EventSource('/events/');
-  maplist.onmessage = function(evnt) {
-      field_event.innerHTML = evnt.data;
-  }
+var counter = new EventSource('/counter/');
+counter.onmessage = function(cnt) {
+    field_counter.innerHTML = cnt.data;
+}
+</script>
+<script type="text/javascript">
+var maplist = new EventSource('/events/');
+maplist.onmessage = function(evnt) {
+    field_event.innerHTML = evnt.data;
+}
 </script>
 
 <body>
@@ -68,10 +68,10 @@
           </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
               <ul class="navbar-nav ">
-                <li class="nav-item">
+                <li class="nav-item active">
                   <a class="nav-link" href="index.html">Globe map</a>
                 </li>
-                <li class="nav-item active">
+                <li class="nav-item">
                   <a class="nav-link" href="flatmap.html">Flat map</a>
                 </li>
               </ul>
@@ -98,23 +98,23 @@
                     </tr>
                     <tr>
                         <td colspan=2>
-                            <div class='scroll' id="field_event">
-                                <div class="field_event" id="field_event">
-                                </div>
-                            </div>
-                        </td>
+                      <div class='scroll' id='field_event'>
+                          <div class="field_event" id="field_event">
+                          </div>
+                      </div>
+                  </td>
                     </tr>
                 </table>
             </div>
         </div>
     </main>
 
-
     <footer class="footer">
       <div class="container">
         <p>Copyright &copy; 2019 Bitmark Inc.</p>
       </div>
     </footer>
+
     <script type="text/javascript" src="js/jquery.1.11.1.js"></script>
     <!-- <script type="text/javascript" src="js/bootstrap.js"></script> -->
     <script type="text/javascript" src="js/SmoothScroll.js"></script>
