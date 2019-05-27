@@ -29,6 +29,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"sync"
 
@@ -39,7 +40,10 @@ const (
 	mutex = &sync.Mutex{}
 )
 
-func LoadConfigFile(path string) (config map[string]interface{}) {
+func LoadConfigFile() (config map[string]interface{}) {
+	if _, err := os.Stat("../config.yaml"); os.IsNotExist(err) {
+		panic("config.yaml does not exist")
+	}
 	mutex.Lock()
 	config.LoadFile(path)
 	mutex.Unlock()
