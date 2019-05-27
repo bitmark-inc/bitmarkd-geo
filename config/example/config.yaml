@@ -1,0 +1,5 @@
+https: false
+public_iface: "vtnet0"
+nodes_csv: "/tmp/nodes.csv"
+node_address: "https://node-d1.live.bitmark.com:2131"
+global_timeout: 10
