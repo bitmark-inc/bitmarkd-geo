@@ -45,7 +45,6 @@ var (
 	plat           float64
 	plon           float64
 	imgPath        = "webserver/mysite/img/"
-	WasItRotate    = 0
 )
 
 // FlatMap - Create the context for the flatmap
@@ -121,10 +120,6 @@ func GlobeMapAddMarker(globemap *globe.Globe, lat float64, lon float64) {
 
 // GlobeMapRender - Render the image for the globe map
 func GlobeMapRender(globemap *globe.Globe, myWanLat float64, myWanLon float64) {
-	if WasItRotate == 0 {
-		globemap.CenterOn(myWanLat, myWanLon)
-		WasItRotate = 1
-	}
 	globemap.CenterOn(myWanLat, myWanLon)
 	globemap.SavePNG(imgPath+"globe.png", 600)
 }
