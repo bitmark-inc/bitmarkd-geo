@@ -36,7 +36,7 @@ import (
 
 var (
 	mutex = &sync.Mutex{}
-	path  = "config.yaml"
+	path  = "/tmp/config.yaml"
 )
 
 func LoadConfigFile() (config map[string]interface{}) {
