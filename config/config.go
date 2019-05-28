@@ -28,27 +28,26 @@
 package config
 
 import (
-	"fmt"
 	"os"
-	"reflect"
 	"sync"
 
-	"github.com/micro/go-config"
+	configuration "github.com/micro/go-config"
 )
 
-const (
+var (
 	mutex = &sync.Mutex{}
+	path  = "config.yaml"
 )
 
 func LoadConfigFile() (config map[string]interface{}) {
-	if _, err := os.Stat("../config.yaml"); os.IsNotExist(err) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
 		panic("config.yaml does not exist")
 	}
 	mutex.Lock()
-	config.LoadFile(path)
+	configuration.LoadFile(path)
 	mutex.Unlock()
 
-	conf := config.Map()
+	conf := configuration.Map()
 
 	return conf
 }
