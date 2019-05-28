@@ -55,7 +55,7 @@ var (
 func dumpCSV(m *utils.TTLMap) {
 	configuration := config.LoadConfigFile()
 
-	file, err := os.Create(configuration["nodes_csv"])
+	file, err := os.Create(configuration["nodes_csv"].(string))
 	if err != nil {
 		panic("Cannot create csv file")
 	}
@@ -86,14 +86,14 @@ func main() {
 	globemap := geolocation.GlobeMap()
 
 	if m.Len() <= 0 {
-		fullUrl := configuration["node_address"] + nodeUrlDir + urlCount
+		fullUrl := configuration["node_address"].(string) + nodeUrlDir + urlCount
 
 		nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl, m)
 
 		for {
 			if nodeKey != lastNodeKey && len(nodeKey) != 0 {
 				lastNodeKey = nodeKey
-				fullUrl = configuration["node_address"] + nodeUrlDir + urlCount + urlKey + lastNodeKey
+				fullUrl = configuration["node_address"].(string) + nodeUrlDir + urlCount + urlKey + lastNodeKey
 				nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl, m)
 			} else {
 				break

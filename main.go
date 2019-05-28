@@ -28,6 +28,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -182,7 +183,8 @@ func main() {
 
 			b.messages <- fmt.Sprintf("%s", html)
 
-			time.Sleep(time.Duration(configuration["global_timeout"].(int)) * time.Second)
+			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
+			time.Sleep(time.Duration(n) * time.Second)
 		}
 	}()
 
@@ -201,7 +203,8 @@ func main() {
 			html := "Number of nodes: " + strconv.Itoa(total)
 			c.messages <- fmt.Sprintf("%s", html)
 
-			time.Sleep(time.Duration(configuration["global_timeout"].(int)) * time.Second)
+			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
+			time.Sleep(time.Duration(n) * time.Second)
 		}
 	}()
 
@@ -212,7 +215,8 @@ func main() {
 			_ = utils.RunStandalone()
 			mutex.Unlock()
 
-			time.Sleep(time.Duration(configuration["global_timeout"].(int)*120) * time.Second)
+			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
+			time.Sleep(time.Duration(n*120) * time.Second)
 		}
 	}()
 
