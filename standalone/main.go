@@ -34,18 +34,18 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/araujobsd/bitmarkdgeo/geolocation"
-	"github.com/araujobsd/bitmarkdgeo/utils"
+	"github.com/araujobsd/bitmarkd-geo/config"
+	"github.com/araujobsd/bitmarkd-geo/geolocation"
+	"github.com/araujobsd/bitmarkd-geo/utils"
 )
 
 const (
 	globalTimeOut = 5
-	nodesFile     = "/tmp/nodes.csv"
 )
 
 var (
 	NodesCount int
-	nodeUrl    = "https://node-d1.live.bitmark.com:2131/bitmarkd/peers?"
+	nodeUrlDir = "/bitmarkd/peers?"
 	urlCount   = "count=100"
 	urlKey     = "&public_key="
 	mutex      = &sync.Mutex{}
@@ -53,7 +53,9 @@ var (
 )
 
 func dumpCSV(m *utils.TTLMap) {
-	file, err := os.Create(nodesFile)
+	configuration := config.LoadConfigFile()
+
+	file, err := os.Create(configuration["nodes_csv"])
 	if err != nil {
 		panic("Cannot create csv file")
 	}
@@ -75,6 +77,7 @@ func dumpCSV(m *utils.TTLMap) {
 func main() {
 	var nodeKey, lastNodeKey string
 	m := utils.NewMap(globalTimeOut * 20)
+	configuration := config.LoadConfigFile()
 
 	myIPlat := 25.0478
 	myIPlon := 121.5318
@@ -83,14 +86,14 @@ func main() {
 	globemap := geolocation.GlobeMap()
 
 	if m.Len() <= 0 {
-		fullUrl := nodeUrl + urlCount
+		fullUrl := configuration["node_address"] + nodeUrlDir + urlCount
 
 		nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl, m)
 
 		for {
 			if nodeKey != lastNodeKey && len(nodeKey) != 0 {
 				lastNodeKey = nodeKey
-				fullUrl = nodeUrl + urlCount + urlKey + lastNodeKey
+				fullUrl = configuration["node_address"] + nodeUrlDir + urlCount + urlKey + lastNodeKey
 				nodeKey = utils.WorldNodes(flatmap, globemap, fullUrl, m)
 			} else {
 				break

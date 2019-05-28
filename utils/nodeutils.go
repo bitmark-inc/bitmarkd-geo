@@ -42,7 +42,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/araujobsd/bitmarkdgeo/geolocation"
+	"github.com/araujobsd/bitmarkd-geo/config"
+	"github.com/araujobsd/bitmarkd-geo/geolocation"
 	"github.com/flopp/go-staticmaps"
 	"github.com/mmcloughlin/globe"
 )
@@ -52,7 +53,9 @@ const (
 )
 
 func webClientIPv4() (webclient *http.Client) {
-	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4("vtnet0")))
+	configuration := config.LoadConfigFile()
+
+	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4(configuration["public_iface"].(string))))
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +118,9 @@ func ParseNode(s []byte) (nodeInfo []geolocation.NodeInfo) {
 }
 
 func parseCsv() (rows [][]string, err error) {
-	file, err := os.Open("/tmp/nodes.csv")
+	configuration := config.LoadConfigFile()
+
+	file, err := os.Open(configuration["nodes_csv"].(string))
 	if err != nil {
 		return nil, err
 	}
@@ -206,9 +211,12 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string, m *TTLMa
 
 			lat, lon, country, have = NodeInCSV(nodeIP[0])
 			if have == true {
+				fmt.Println("===> HAVE:", nodeIP[0])
 				m.Put(nodeIP[0], country, lat, lon)
 			} else {
 				lat, lon, country, err = geolocation.GetLatLon(nodeIP[0])
+				fmt.Println("===> DONT HAVE:", nodeIP[0])
+				fmt.Println(err)
 				if err == nil {
 					m.Put(nodeIP[0], country, lat, lon)
 				}

@@ -39,19 +39,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/araujobsd/bitmarkdgeo/utils"
-)
-
-const (
-	globalTimeOut = 10
+	"github.com/araujobsd/bitmarkd-geo/config"
+	"github.com/araujobsd/bitmarkd-geo/utils"
 )
 
 var (
-	nodeUrl  = "https://node-d1.live.bitmark.com:2131/bitmarkd/peers?"
-	urlCount = "count=100"
-	urlKey   = "&public_key="
-	mutex    = &sync.Mutex{}
-	IPlist   = make(map[string]string)
+	mutex = &sync.Mutex{}
 )
 
 type Broker struct {
@@ -68,12 +61,10 @@ func (b *Broker) Start() {
 
 			case s := <-b.newClients:
 				b.clients[s] = true
-				//log.Println("New client")
 
 			case s := <-b.defunctClients:
 				delete(b.clients, s)
 				close(s)
-				//log.Println("Removed client")
 
 			case msg := <-b.messages:
 				for s := range b.clients {
@@ -140,6 +131,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	configuration := config.LoadConfigFile()
 
 	b := &Broker{
 		make(map[chan string]bool),
@@ -190,28 +182,26 @@ func main() {
 
 			b.messages <- fmt.Sprintf("%s", html)
 
-			time.Sleep(time.Duration(globalTimeOut) * time.Second)
+			time.Sleep(time.Duration(configuration["global_timeout"].(int)) * time.Second)
 		}
 	}()
 
 	// Create nodes counter
 	go func() {
-		var html string
-		var total int
-
-		mutex.Lock()
-		con := utils.CountryTotal()
-		mutex.Unlock()
-
-		for _, v := range con {
-			total += v
-		}
-
 		for {
-			html = "Number of nodes: " + strconv.Itoa(total)
+			mutex.Lock()
+			con := utils.CountryTotal()
+			mutex.Unlock()
+
+			total := 0
+			for _, v := range con {
+				total += v
+			}
+
+			html := "Number of nodes: " + strconv.Itoa(total)
 			c.messages <- fmt.Sprintf("%s", html)
 
-			time.Sleep(time.Duration(globalTimeOut) * time.Second)
+			time.Sleep(time.Duration(configuration["global_timeout"].(int)) * time.Second)
 		}
 	}()
 
@@ -222,13 +212,15 @@ func main() {
 			_ = utils.RunStandalone()
 			mutex.Unlock()
 
-			time.Sleep(time.Duration(globalTimeOut*120) * time.Second)
+			time.Sleep(time.Duration(configuration["global_timeout"].(int)*120) * time.Second)
 		}
 	}()
 
 	http.Handle("/", http.FileServer(http.Dir("webserver/mysite")))
-	err := http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+
+	if configuration["https"].(bool) == false {
+		_ = http.ListenAndServe(":8001", nil)
+	} else {
+		_ = http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)
 	}
 }
