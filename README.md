@@ -5,10 +5,15 @@
 
 bitmarkd-geo
 ================
-TBD
+This software maps all Bitmark Inc. nodes in the live network.
 
-## Build instructions
-1) `make build`
+## Build and run instructions
+1) `make release`
+2) `cd standalone && make release`
+3) `cp <binary> /usr/local/bin/bitmarkd-geo-cmd`
+4) `cd ../`
+5) `cp config/example/config.yaml /tmp/`
+6) `daemon ./bitmarkdgeo-freebsd-amd64-1.0`
 
 ## Copyright and licensing
 Distributed under [2-Clause BSD License](https://github.com/araujobsd/aws-icinga2-generator/blob/master/LICENSE).
