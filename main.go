@@ -42,6 +42,7 @@ import (
 
 	"github.com/araujobsd/bitmarkd-geo/config"
 	"github.com/araujobsd/bitmarkd-geo/utils"
+	"github.com/nytimes/gziphandler"
 )
 
 var (
@@ -220,7 +221,10 @@ func main() {
 		}
 	}()
 
-	http.Handle("/", http.FileServer(http.Dir("webserver/mysite")))
+	// Add Gzip compress
+	handlerNoGz := http.FileServer(http.Dir("webserver/mysite"))
+	handlerWGz := gziphandler.GzipHandler(handlerNoGz)
+	http.Handle("/", handlerWGz)
 
 	if configuration["https"].(bool) == false {
 		_ = http.ListenAndServe(":8001", nil)
