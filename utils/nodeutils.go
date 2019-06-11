@@ -82,9 +82,6 @@ func webClientIPv4() (webclient *http.Client) {
 		},
 	}
 
-	// set map to nil
-	configuration = nil
-
 	return webcl
 }
 
@@ -139,6 +136,7 @@ func parseCsv() (rows [][]string, err error) {
 	return rows, err
 }
 
+// RunStandalone - Runs the standalone go program to generate maps
 func RunStandalone() (err error) {
 	_, err = exec.Command(standalone).Output()
 	if err != nil {
@@ -148,6 +146,7 @@ func RunStandalone() (err error) {
 	return
 }
 
+// CountryTotal - Returns a map with total number of nodes by country
 func CountryTotal() (m map[string]int) {
 	m = make(map[string]int)
 
@@ -164,6 +163,7 @@ func CountryTotal() (m map[string]int) {
 	return m
 }
 
+// NodeInCSV - Check if the node is onto CSV and avoid call ip-api.com
 func NodeInCSV(ipv4 string) (lat float64, lon float64, country string, have bool) {
 	rows, _ := parseCsv()
 	for _, val := range rows {
@@ -234,6 +234,7 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string, m *TTLMa
 	return lastKey
 }
 
+// FindFileFlag - Find the flag for each country
 func FindFileFlag(dir string, file []string) (flag string) {
 	for _, v := range file {
 		found, err := filepath.Glob(dir + v)

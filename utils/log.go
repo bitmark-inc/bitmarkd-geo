@@ -33,10 +33,15 @@ import (
 )
 
 var (
-	Trace   *log.Logger
-	Info    *log.Logger
+	// Trace - Used to trace code
+	Trace *log.Logger
+	// Info - Used as information message
+	Info *log.Logger
+	// Warning - Used when something didn't work as expected but we
+	//           are OK with it.
 	Warning *log.Logger
-	Error   *log.Logger
+	// Error - Something failed.
+	Error *log.Logger
 )
 
 // InitLog - Initialize package log.

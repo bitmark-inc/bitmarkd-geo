@@ -50,6 +50,7 @@ var (
 	mutex = &sync.Mutex{}
 )
 
+// Broker - It is the structure that holds clients and messages
 type Broker struct {
 	clients        map[chan string]bool
 	newClients     chan chan string
@@ -57,6 +58,7 @@ type Broker struct {
 	messages       chan string
 }
 
+// Broker.Start - It starts the routine when client is connected
 func (b *Broker) Start() {
 	go func() {
 		for {
@@ -187,9 +189,6 @@ func main() {
 
 			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
 			time.Sleep(time.Duration(n) * time.Second)
-			// nil everything
-			countryTotal = nil
-			sortCountries = nil
 
 			// Force free memory
 			debug.FreeOSMemory()

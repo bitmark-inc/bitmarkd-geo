@@ -39,6 +39,7 @@ var (
 	path  = "/tmp/config.yaml"
 )
 
+// LoadConfigFile - Load the configuration file
 func LoadConfigFile() (config map[string]interface{}) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		panic("config.yaml does not exist")

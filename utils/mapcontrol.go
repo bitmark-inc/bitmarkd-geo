@@ -32,6 +32,7 @@ import (
 	"time"
 )
 
+// Nodes - This struct receives all info for each node
 type Nodes struct {
 	Address    string
 	Country    string
@@ -40,11 +41,13 @@ type Nodes struct {
 	lastAccess int64
 }
 
+// TTLMap - Map with time to live
 type TTLMap struct {
 	m     map[string]*Nodes
 	mutex sync.Mutex
 }
 
+// NewMap - Create a new map type with TTL
 func NewMap(maxTTL int) (m *TTLMap) {
 	m = &TTLMap{m: make(map[string]*Nodes)}
 	go func() {
@@ -61,10 +64,12 @@ func NewMap(maxTTL int) (m *TTLMap) {
 	return
 }
 
+// TTLMap.Len - Return the length of a map
 func (m *TTLMap) Len() int {
 	return len(m.m)
 }
 
+// TTLMap.Put - Put a new intem into a map
 func (m *TTLMap) Put(k, country string, lat float64, lon float64) {
 
 	m.mutex.Lock()
@@ -77,6 +82,7 @@ func (m *TTLMap) Put(k, country string, lat float64, lon float64) {
 	m.mutex.Unlock()
 }
 
+// TTLMap.Get - Get an item from a map
 func (m *TTLMap) Get(k string) (v string) {
 	m.mutex.Lock()
 	if it, ok := m.m[k]; ok {
@@ -88,6 +94,7 @@ func (m *TTLMap) Get(k string) (v string) {
 
 }
 
+// TTLMap.GetAll - Unsafe way to get all items from a map
 func (m *TTLMap) GetAll() (c map[string]*Nodes) {
 	return m.m
 }
