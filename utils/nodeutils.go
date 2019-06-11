@@ -81,6 +81,10 @@ func webClientIPv4() (webclient *http.Client) {
 			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
+
+	// set map to nil
+	configuration = nil
+
 	return webcl
 }
 
