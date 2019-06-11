@@ -44,7 +44,6 @@ const (
 )
 
 var (
-	NodesCount int
 	nodeUrlDir = "/bitmarkd/peers?"
 	urlCount   = "count=100"
 	urlKey     = "&public_key="
