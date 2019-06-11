@@ -48,7 +48,6 @@ var (
 	urlCount   = "count=100"
 	urlKey     = "&public_key="
 	mutex      = &sync.Mutex{}
-	IPlist     = make(map[string]string)
 )
 
 func dumpCSV(m *utils.TTLMap) {
