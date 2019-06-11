@@ -35,6 +35,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"sync"
@@ -186,6 +187,12 @@ func main() {
 
 			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
 			time.Sleep(time.Duration(n) * time.Second)
+			// nil everything
+			countryTotal = nil
+			sortCountries = nil
+
+			// Force free memory
+			debug.FreeOSMemory()
 		}
 	}()
 
@@ -206,6 +213,9 @@ func main() {
 
 			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
 			time.Sleep(time.Duration(n) * time.Second)
+
+			// Force free memory
+			debug.FreeOSMemory()
 		}
 	}()
 
@@ -218,6 +228,9 @@ func main() {
 
 			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
 			time.Sleep(time.Duration(n*120) * time.Second)
+
+			// Force free memory
+			debug.FreeOSMemory()
 		}
 	}()
 
