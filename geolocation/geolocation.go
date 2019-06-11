@@ -61,7 +61,7 @@ type NodeInfo struct {
 var (
 	ipapi      = "http://ip-api.com/json/"
 	gl         GeoLocation
-	CountryMap map[string]int
+	countryMap map[string]int
 )
 
 // GetLocalIPv4 - Return the local machine WAN ip
@@ -92,14 +92,14 @@ func GetLocalIPv4(iface string) (ifaceip net.IP) {
 }
 
 func SetCountriesNumber(countryName string) {
-	if CountryMap == nil {
-		CountryMap = make(map[string]int)
+	if countryMap == nil {
+		countryMap = make(map[string]int)
 	}
 
-	if _, ok := CountryMap[countryName]; ok {
-		CountryMap[countryName]++
+	if _, ok := countryMap[countryName]; ok {
+		countryMap[countryName]++
 	} else {
-		CountryMap[countryName] = 1
+		countryMap[countryName] = 1
 	}
 }
 
