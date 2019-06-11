@@ -91,6 +91,7 @@ func GetLocalIPv4(iface string) (ifaceip net.IP) {
 	return (nil)
 }
 
+// SetCountriesNumber - Create a map and set the number of nodes in each country
 func SetCountriesNumber(countryName string) {
 	if countryMap == nil {
 		countryMap = make(map[string]int)

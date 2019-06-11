@@ -64,12 +64,12 @@ func NewMap(maxTTL int) (m *TTLMap) {
 	return
 }
 
-// TTLMap.Len - Return the length of a map
+// Len - Return the length of a map
 func (m *TTLMap) Len() int {
 	return len(m.m)
 }
 
-// TTLMap.Put - Put a new intem into a map
+// Put - Put a new intem into a map
 func (m *TTLMap) Put(k, country string, lat float64, lon float64) {
 
 	m.mutex.Lock()
@@ -82,7 +82,7 @@ func (m *TTLMap) Put(k, country string, lat float64, lon float64) {
 	m.mutex.Unlock()
 }
 
-// TTLMap.Get - Get an item from a map
+// Get - Get an item from a map
 func (m *TTLMap) Get(k string) (v string) {
 	m.mutex.Lock()
 	if it, ok := m.m[k]; ok {
@@ -94,7 +94,7 @@ func (m *TTLMap) Get(k string) (v string) {
 
 }
 
-// TTLMap.GetAll - Unsafe way to get all items from a map
+// GetAll - Unsafe way to get all items from a map
 func (m *TTLMap) GetAll() (c map[string]*Nodes) {
 	return m.m
 }

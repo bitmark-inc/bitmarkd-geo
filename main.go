@@ -58,7 +58,7 @@ type Broker struct {
 	messages       chan string
 }
 
-// Broker.Start - It starts the routine when client is connected
+// Start - It starts the routine when client is connected
 func (b *Broker) Start() {
 	go func() {
 		for {
