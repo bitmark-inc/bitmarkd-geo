@@ -31,7 +31,7 @@ import (
 	"os"
 	"sync"
 
-	configuration "github.com/micro/go-config"
+	configuration "github.com/micro/go-micro/config"
 )
 
 var (
