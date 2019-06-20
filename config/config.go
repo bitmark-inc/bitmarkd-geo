@@ -45,7 +45,10 @@ func LoadConfigFile() (config map[string]interface{}) {
 		panic("config.yaml does not exist")
 	}
 	mutex.Lock()
-	configuration.LoadFile(path)
+	err := configuration.LoadFile(path)
+	if err != nil {
+		panic(err)
+	}
 	mutex.Unlock()
 
 	conf := configuration.Map()

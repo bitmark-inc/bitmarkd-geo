@@ -115,7 +115,10 @@ func GetLatLon(ipAddress string) (lat float64, lon float64, country string, err 
 	defer response.Body.Close()
 
 	decoder := json.NewDecoder(response.Body)
-	decoder.Decode(&gl)
+	err = decoder.Decode(&gl)
+	if err != nil {
+		panic(err)
+	}
 
 	if gl.Status == "fail" {
 		err = errors.New(gl.Status)

@@ -15,7 +15,7 @@ func TestGetLocalIPv4(t *testing.T) {
 
 func TestGetLatLon(t *testing.T) {
 	ipAddress := "8.8.8.8"
-	lat, lon, err := GetLatLon(ipAddress)
+	lat, lon, _, err := GetLatLon(ipAddress)
 
 	if err != nil {
 		t.Error("Probably you have no Internet")

@@ -121,5 +121,8 @@ func GlobeMapAddMarker(globemap *globe.Globe, lat float64, lon float64) {
 // GlobeMapRender - Render the image for the globe map
 func GlobeMapRender(globemap *globe.Globe, myWanLat float64, myWanLon float64) {
 	globemap.CenterOn(myWanLat, myWanLon)
-	globemap.SavePNG(imgPath+"globe.png", 600)
+	err := globemap.SavePNG(imgPath+"globe.png", 600)
+	if err != nil {
+		panic(err)
+	}
 }

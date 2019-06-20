@@ -55,6 +55,7 @@ const (
 func webClientIPv4() (webclient *http.Client) {
 	configuration := config.LoadConfigFile()
 
+	//lint:ignore S1025 GetLocalIPv4 should return a string instead of IP interface
 	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4(configuration["public_iface"].(string))))
 	if err != nil {
 		panic(err)
@@ -113,7 +114,10 @@ func brackets(r rune) bool {
 
 // ParseNode - Parses a json provide by the bitmarkd node
 func ParseNode(s []byte) (nodeInfo []geolocation.NodeInfo) {
-	json.Unmarshal(s, &nodeInfo)
+	err := json.Unmarshal(s, &nodeInfo)
+	if err != nil {
+		panic(err)
+	}
 
 	return nodeInfo
 }
@@ -214,7 +218,7 @@ func WorldNodes(flatmap *sm.Context, globemap *globe.Globe, url string, m *TTLMa
 			}
 
 			lat, lon, country, have = NodeInCSV(nodeIP[0])
-			if have == true {
+			if have {
 				m.Put(nodeIP[0], country, lat, lon)
 			} else {
 				lat, lon, country, err = geolocation.GetLatLon(nodeIP[0])

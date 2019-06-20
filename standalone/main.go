@@ -99,7 +99,11 @@ func main() {
 		}
 
 		mutex.Lock()
-		geolocation.FlatMapRender(flatmap)
+		err := geolocation.FlatMapRender(flatmap)
+		if err != nil {
+			panic(err)
+		}
+
 		geolocation.GlobeMapRender(globemap, myIPlat, myIPlon)
 		mutex.Unlock()
 	}

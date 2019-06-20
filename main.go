@@ -30,7 +30,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -92,6 +91,7 @@ func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	b.newClients <- messageChan
 
+	//lint:ignore SA1019 XXX: Needs to be rewrite
 	notify := w.(http.CloseNotifier).CloseNotify()
 	go func() {
 		<-notify
@@ -115,22 +115,6 @@ func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.Flush()
 	}
 
-	log.Println("Finished HTTP request ", r.URL.Path)
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	t, err := template.ParseFiles("webserver/mysite/index.html")
-	if err != nil {
-		log.Fatal("Error parsing template.")
-
-	}
-
-	t.Execute(w, "Bitmark Inc.")
 	log.Println("Finished HTTP request ", r.URL.Path)
 }
 
@@ -185,7 +169,7 @@ func main() {
 				html = html + "<div class='field_event'><span class='col col1'><center>" + strconv.Itoa(countryTotal[v]) + "</center></span>" + "<span class='col col2'><img height='30' width='40' src=" + utils.FindFileFlag("webserver/mysite/flags/", l) + "> - " + v + "</span></div>"
 			}
 
-			b.messages <- fmt.Sprintf("%s", html)
+			b.messages <- html
 
 			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
 			time.Sleep(time.Duration(n) * time.Second)
@@ -208,7 +192,7 @@ func main() {
 			}
 
 			html := "Number of nodes: " + strconv.Itoa(total)
-			c.messages <- fmt.Sprintf("%s", html)
+			c.messages <- html
 
 			n, _ := strconv.Atoi(configuration["global_timeout"].(json.Number).String())
 			time.Sleep(time.Duration(n) * time.Second)
@@ -238,7 +222,7 @@ func main() {
 	handlerWGz := gziphandler.GzipHandler(handlerNoGz)
 	http.Handle("/", handlerWGz)
 
-	if configuration["https"].(bool) == false {
+	if !configuration["https"].(bool) {
 		_ = http.ListenAndServe(":8001", nil)
 	} else {
 		_ = http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)

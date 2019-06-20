@@ -2,6 +2,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/bitmark-inc/bitmarkd-geo.svg)](https://github.com/bitmark-inc/bitmarkd-geo/issues)
 [![GitHub forks](https://img.shields.io/github/forks/bitmark-inc/bitmarkd-geo.svg)](https://github.com/bitmark-inc/bitmarkd-geo/network)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bitmark-inc/bitmarkd-geo)](https://goreportcard.com/report/github.com/bitmark-inc/bitmarkd-geo)
+[![CircleCI](https://circleci.com/gh/bitmark-inc/bitmarkd-geo.svg?style=svg)](https://circleci.com/gh/bitmark-inc/bitmarkd-geo)
 
 bitmarkd-geo
 ================
