@@ -56,8 +56,7 @@ const (
 func webClientIPv4() (webclient *http.Client) {
 	configuration := config.LoadConfigFile()
 
-	//lint:ignore S1025 GetLocalIPv4 should return a string instead of IP interface
-	localAddr, err := net.ResolveIPAddr("ip", fmt.Sprintf("%s", geolocation.GetLocalIPv4(configuration["public_iface"].(string))))
+	localAddr, err := net.ResolveIPAddr("ip", geolocation.GetLocalIPv4(configuration["public_iface"].(string)).String())
 	if err != nil {
 		panic(err)
 	}

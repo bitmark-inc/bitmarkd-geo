@@ -41,9 +41,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/NYTimes/gziphandler"
 	"github.com/araujobsd/bitmarkd-geo/config"
 	"github.com/araujobsd/bitmarkd-geo/utils"
-	"github.com/nytimes/gziphandler"
 )
 
 var (
@@ -92,10 +92,9 @@ func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	b.newClients <- messageChan
 
-	//lint:ignore SA1019 XXX: Needs to be rewrite
-	notify := w.(http.CloseNotifier).CloseNotify()
+	notify := r.Context()
 	go func() {
-		<-notify
+		<-notify.Done()
 		b.defunctClients <- messageChan
 		log.Println("HTTP connection closed.")
 	}()
