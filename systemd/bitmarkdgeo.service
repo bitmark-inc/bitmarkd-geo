@@ -1,0 +1,15 @@
+[Unit]
+Description="Bitmark nodes map"
+Documentation=https://github.com/araujobsd/bitmarkd-geo
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/bitmarkdgeo
+Restart=always
+RestartSec=2
+User=root
+
+[Install]
+WantedBy=multi-user.target

@@ -8,6 +8,7 @@ replace (
 )
 
 require (
+	github.com/NYTimes/gziphandler v1.1.1
 	github.com/Wessie/appdirs v0.0.0-20141031215813-6573e894f8e2 // indirect
 	github.com/flopp/go-coordsparser v0.0.0-20160810104536-845bca739e26 // indirect
 	github.com/flopp/go-staticmaps v0.0.0-20180404185116-320790ed5329

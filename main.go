@@ -166,7 +166,7 @@ func main() {
 			html := ""
 			for _, v := range sortCountries {
 				l := []string{"*" + v + "*"}
-				html = html + "<div class='field_event'><span class='col col1'><center>" + strconv.Itoa(countryTotal[v]) + "</center></span>" + "<span class='col col2'><img height='30' width='40' src=" + utils.FindFileFlag("webserver/mysite/flags/", l) + "> - " + v + "</span></div>"
+				html = html + "<div class='field_event'><span class='col col1'><center>" + strconv.Itoa(countryTotal[v]) + "</center></span>" + "<span class='col col2'><img height='30' width='40' src=" + utils.FindFileFlag("/webserver/mysite/flags/", l) + "> - " + v + "</span></div>"
 			}
 
 			b.messages <- html
@@ -218,7 +218,7 @@ func main() {
 	}()
 
 	// Add Gzip compress
-	handlerNoGz := http.FileServer(http.Dir("webserver/mysite"))
+	handlerNoGz := http.FileServer(http.Dir("/webserver/mysite"))
 	handlerWGz := gziphandler.GzipHandler(handlerNoGz)
 	http.Handle("/", handlerWGz)
 

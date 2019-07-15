@@ -248,7 +248,7 @@ func FindFileFlag(dir string, file []string) (flag string) {
 		}
 
 		if len(found) != 0 {
-			found[0] = strings.Replace(found[0], "webserver/mysite/", "", -1)
+			found[0] = strings.Replace(found[0], "/webserver/mysite/", "", -1)
 			return found[0]
 		}
 	}
