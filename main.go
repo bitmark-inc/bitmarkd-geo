@@ -118,6 +118,15 @@ func (b *Broker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("Finished HTTP request ", r.URL.Path)
 }
 
+func redirect(w http.ResponseWriter, req *http.Request) {
+	target := "https://" + req.Host + req.URL.Path
+	if len(req.URL.RawQuery) > 0 {
+		target += "?" + req.URL.RawQuery
+	}
+
+	http.Redirect(w, req, target, http.StatusTemporaryRedirect)
+}
+
 func main() {
 	utils.InitLog(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	configuration := config.LoadConfigFile()
@@ -225,6 +234,7 @@ func main() {
 	if !configuration["https"].(bool) {
 		_ = http.ListenAndServe(":80", nil)
 	} else {
+		go http.ListenAndServe(":80", http.HandlerFunc(redirect))
 		_ = http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)
 	}
 }
