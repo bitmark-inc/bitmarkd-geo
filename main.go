@@ -234,6 +234,7 @@ func main() {
 	if !configuration["https"].(bool) {
 		_ = http.ListenAndServe(":80", nil)
 	} else {
+		//noling:errcheck
 		go http.ListenAndServe(":80", http.HandlerFunc(redirect))
 		_ = http.ListenAndServeTLS(":443", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/cert.pem", "/usr/local/etc/letsencrypt/live/nodes.bitmark.com/privkey.pem", nil)
 	}
