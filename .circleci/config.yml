@@ -39,11 +39,33 @@ jobs:
           command: |
              wget https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz
              tar -xpvf misspell_0.3.4_linux_64bit.tar.gz
-             ls .
-             pwd
       - run:
-          name: misspell
+          name: Run misspell
           command: |
-             ls
-             pwd
              ./misspell ./...
+      - run:
+          name: Get gosec
+          command: |
+             wget https://github.com/securego/gosec/releases/download/2.0.0/gosec_2.0.0_linux_amd64.tar.gz
+             tar -xpvf gosec_2.0.0_linux_amd64.tar.gz
+      - run:
+          name: Run gosec
+          command: |
+             ./gosec -exclude=G104,G107,G204,G402,G304 ./...
+      - run:
+          name: Get golangcli-lint 
+          command: |
+             wget https://github.com/golangci/golangci-lint/releases/download/v1.19.0/golangci-lint-1.19.0-linux-amd64.tar.gz
+             tar -xpvf golangci-lint-1.19.0-linux-amd64.tar.gz
+             mv golangci-lint-1.19.0-linux-amd64/golangci-lint .
+      - run:
+          name: Run golangcli-lint
+          command: |
+                  golangci-lint run --no-config --disable=ineffassign,errcheck,govet
+      - run:
+          name: Get golint 
+          command: go get -v golang.org/x/lint/golint
+      - run:
+          name: Run golint 
+          command: |
+                 golint ./...
