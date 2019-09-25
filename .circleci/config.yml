@@ -61,7 +61,7 @@ jobs:
       - run:
           name: Run golangcli-lint
           command: |
-                  golangci-lint run --no-config --disable=ineffassign,errcheck,govet
+                  ./golangci-lint run --no-config --disable=ineffassign,errcheck,govet
       - run:
           name: Get golint 
           command: go get -v golang.org/x/lint/golint
