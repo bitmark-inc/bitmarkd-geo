@@ -32,6 +32,7 @@ jobs:
             sudo apt-get update
             sudo apt-get -t testing install libargon2-1 libargon2-dev
             sudo apt-get install uuid-dev libzmq3-dev
+            sudo apt-get install wget
             sudo apt-get -t testing install pkg-config
       - run:
          name: go dependencies
@@ -41,6 +42,11 @@ jobs:
             go get -v github.com/client9/misspell/cmd/misspell
             go get -v github.com/securego/gosec/cmd/gosec
             go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
+      - run:
+          name: Get misspell
+          command: |
+             wget https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz
+             tar -xpvf misspell_0.3.4_linux_64bit.tar.gz
       - run:
           name: golint
           command: golint ./...
