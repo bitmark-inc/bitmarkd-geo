@@ -35,27 +35,10 @@ jobs:
             sudo apt-get install wget
             sudo apt-get -t testing install pkg-config
       - run:
-         name: go dependencies
-         command: |
-            go get -v -t -d ./...
-            go get -v golang.org/x/lint/golint
-            go get -v github.com/client9/misspell/cmd/misspell
-            go get -v github.com/securego/gosec/cmd/gosec
-            go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
-      - run:
           name: Get misspell
           command: |
              wget https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz
              tar -xpvf misspell_0.3.4_linux_64bit.tar.gz
       - run:
-          name: golint
-          command: golint ./...
-      - run:
           name: misspell
           command: misspell ./...
-      - run:
-          name: gosec
-          command: gosec -exclude=G104,G107,G204,G402,G304 ./...
-      - run:
-          name: golangcli-lint
-          command: golangci-lint run --no-config --disable=ineffassign,errcheck,govet
