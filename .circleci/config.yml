@@ -39,6 +39,7 @@ jobs:
           command: |
              wget https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz
              tar -xpvf misspell_0.3.4_linux_64bit.tar.gz
+             ls .
       - run:
           name: misspell
           command: misspell ./...
